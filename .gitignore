@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.log
+qdrant_storage/
+knowledge_base/live_security_patch.txt
+.DS_Store

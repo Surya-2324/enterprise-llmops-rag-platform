@@ -1,0 +1,33 @@
+Model serving monitoring systems track operational latencies and error anomaly spikes.
+
+Database automatic snapshots should run every 24 hours to secure vector stores against unexpected service host crashes.
+
+Database Health Checks and Monitoring
+
+Database status checks should be performed at regular intervals to ensure system reliability. The standard approach involves:
+
+1. Automated Health Monitoring: Set up continuous health checks to monitor database performance and availability. These checks typically run every 5-15 minutes during peak operational hours.
+
+2. Daily Verification: Conduct comprehensive database verification checks once per day, ideally during low-traffic periods to minimize performance impact.
+
+3. Snapshot Schedule: Automatic database snapshots run every 24 hours to protect against data loss and system failures.
+
+4. Log Rotation: Review and rotate database logs every 7 days or when they reach 100MB, whichever comes first.
+
+5. Performance Audits: Schedule quarterly performance audits to identify optimization opportunities and address bottlenecks.
+
+Database Backup and Recovery
+
+Backup Strategy: Implement incremental backups every 6 hours and full backups weekly to maintain data integrity.
+
+Recovery Time Objective (RTO): Maintain RTO of under 4 hours for critical database services.
+
+Testing: Conduct monthly backup recovery drills to ensure restore procedures work correctly.
+
+Vector Store Operations
+
+Vector store databases require special attention due to their distributed nature:
+
+- Index Maintenance: Defragment vector indices monthly to maintain search performance.
+- Capacity Planning: Monitor vector store growth and scale infrastructure when usage exceeds 70% capacity.
+- Query Optimization: Review slow queries weekly to improve retrieval latency.
