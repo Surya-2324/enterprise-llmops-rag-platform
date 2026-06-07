@@ -30,7 +30,7 @@ if user_query:
                 )
                 
                 response = general_client.chat.completions.create(
-                    model="grok-beta",
+                    model="grok-2",  # <-- Updated from grok-beta
                     messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
