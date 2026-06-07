@@ -1,5 +1,6 @@
 import streamlit as st
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient\
+from openai import OpenAI
 
 # Global initialization - MUST be at the top level
 qdrant_client = QdrantClient(
