@@ -2,45 +2,24 @@ import streamlit as st
 from openai import OpenAI
 from qdrant_client import QdrantClient
 
-# ... (Keep your existing Qdrant and OpenAI client initializations here) ...
+# --- Configuration & Initialization ---
+st.set_page_config(page_title="Enterprise AI Platform", layout="wide")
 
-# 🌐 Sidebar Configuration for App Modes
-st.sidebar.title("🤖 Platform Settings")
-app_mode = st.sidebar.radio(
-    "Choose System Intelligence Mode:",
-    ["Open-Source (General Knowledge)", "Enterprise RAG (Knowledge Base)"]
+# Initialize Clients
+qdrant_client = QdrantClient(
+    url=st.secrets["QDRANT_URL"],
+    api_key=st.secrets["QDRANT_API_KEY"]
 )
 
-# ... (Keep your layout title code) ...
-
-# User Input
-user_query = st.text_input("Submit system or architecture questions:")
-
-if user_query:
-    with st.spinner("Processing request..."):
-        
-        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-   # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-    # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
-      # --- Unified Helper Function ---
 def get_llm_response(prompt, context=None):
     client = OpenAI(
         api_key=st.secrets["GEMINI_API_KEY"],
         base_url="https://generativelanguage.googleapis.com/v1beta/openai"
     )
     
-    # If context is provided, we are in RAG mode; otherwise, General mode.
-    system_instruction = "You are a helpful Enterprise AI assistant."
+    system_instruction = "You are a helpful, brilliant Enterprise AI assistant."
     if context:
-        system_instruction = f"Use this retrieved context to answer: {context}"
+        system_instruction = f"Use this retrieved enterprise context to answer the user: {context}"
         
     response = client.chat.completions.create(
         model="gemini-2.5-flash",
@@ -51,7 +30,17 @@ def get_llm_response(prompt, context=None):
     )
     return response.choices[0].message.content
 
-# --- Main App Logic ---
+# --- UI Layout ---
+st.title("🏢 Enterprise LLMOps Platform")
+st.sidebar.title("🤖 Platform Settings")
+app_mode = st.sidebar.radio(
+    "Choose System Intelligence Mode:",
+    ["Open-Source (General Knowledge)", "Knowledge Base Retrieval (RAG)"]
+)
+
+user_query = st.text_input("Submit system or architecture questions:")
+
+# --- Core Logic ---
 if user_query:
     with st.chat_message("user"):
         st.write(user_query)
@@ -59,7 +48,7 @@ if user_query:
     try:
         # MODE 1: General Knowledge
         if app_mode == "Open-Source (General Knowledge)":
-            with st.spinner("🧠 Thinking..."):
+            with st.spinner("🧠 Generating general response..."):
                 answer = get_llm_response(user_query)
                 with st.chat_message("assistant"):
                     st.write(answer)
@@ -67,28 +56,24 @@ if user_query:
         # MODE 2: RAG Pipeline
         elif app_mode == "Knowledge Base Retrieval (RAG)":
             with st.spinner("🔍 Retrieving from Vector DB..."):
-                # Search Qdrant
+                # Note: Ensure query_vector matches your embedding model dimensions (e.g., 768 or 1536)
                 search_results = qdrant_client.search(
                     collection_name="enterprise_knowledge",
-                    query_vector=[0.1] * 1536, # Ensure this matches your embedding size
+                    query_vector=[0.0] * 1536, 
                     limit=3
                 )
+                
                 retrieved_context = "\n".join([hit.payload.get("text", "") for hit in search_results if hit.payload])
                 
-                # Get RAG Answer
+                if not retrieved_context:
+                    retrieved_context = "No specific enterprise documentation found."
+                
                 answer = get_llm_response(user_query, context=retrieved_context)
                 
                 with st.chat_message("assistant"):
                     st.write(answer)
-                    with st.expander("🛠️ View RAG Context"):
+                    with st.expander("🛠️ View RAG Context & Metadata"):
                         st.json([hit.payload for hit in search_results])
 
     except Exception as e:
-        st.error(f"Error: {e}")
-            except Exception as e:
-                st.error(f"Error calling LLM: {e}")
-        # 🔒 MODE 2: Enterprise RAG Mode (Your Original Logic)
-        else:
-            # Put your existing embedding generation, Qdrant payload search, 
-            # and context-augmented LLM prompt logic right here.
-            pass
+        st.error(f"Pipeline Error: {e}")
