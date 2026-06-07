@@ -8,7 +8,12 @@ qdrant_client = QdrantClient(
     url=st.secrets["QDRANT_URL"],
     api_key=st.secrets["QDRANT_API_KEY"]
 )
-
+# Updated to use the correct collection name and vector size found in your dashboard
+search_results = qdrant_client.query_points(
+    collection_name="system_architecture",  # Correct name
+    query=[0.0] * 384,                      # Correct dimension for your collection
+    limit=3
+).points
 # ... (rest of your functions and code)
 # --- Configuration & Initialization ---
 st.set_page_config(page_title="Enterprise AI Platform", layout="wide")
