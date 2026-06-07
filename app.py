@@ -23,6 +23,7 @@ if user_query:
        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
+        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
         if app_mode == "Open-Source (General Knowledge)":
             try:
                 # Fully self-contained client configuration
@@ -32,7 +33,7 @@ if user_query:
                 )
                 
                 response = general_client.chat.completions.create(
-                    model="grok-4.3",  # The current standard production flagship text model identifier
+                    model="grok-4.3",  # Flagship production model alias
                     messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
@@ -40,8 +41,6 @@ if user_query:
                 )
                 st.write(response.choices[0].message.content)
                 
-            except Exception as e:
-                st.error(f"Error calling LLM: {e}")
             except Exception as e:
                 st.error(f"Error calling LLM: {e}")
         # 🔒 MODE 2: Enterprise RAG Mode (Your Original Logic)
