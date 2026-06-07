@@ -22,12 +22,13 @@ if user_query:
         # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
         if app_mode == "Open-Source (General Knowledge)":
             try:
-                response = openai_client.chat.completions.create(
-                    model="grok-beta",  # or your preferred xAI model string
-                    messages=[
+                response = client.chat.completions.create(  # <-- Change openai_client to client
+                 model="grok-beta",
+                 messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
-                    ]
+                ]
+)
                 )
                 st.write(response.choices[0].message.content)
                 
