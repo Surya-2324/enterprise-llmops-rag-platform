@@ -4,7 +4,10 @@ from qdrant_client import QdrantClient
 
 # --- Configuration & Initialization ---
 st.set_page_config(page_title="Enterprise AI Platform", layout="wide")
-
+# TEMPORARY DEBUGGING - REMOVE AFTER FIXING
+st.write(f"URL being used: {st.secrets.get('QDRANT_URL')}")
+# Do NOT print the API key itself, but check its length
+st.write(f"API Key present: {len(st.secrets.get('QDRANT_API_KEY', '')) > 0}")
 # Initialize Qdrant Client
 qdrant_client = QdrantClient(
     url=st.secrets["QDRANT_URL"],
