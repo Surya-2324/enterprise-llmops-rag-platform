@@ -1,7 +1,6 @@
 import streamlit as st
-from qdrant_client import QdrantClient\
 from openai import OpenAI
-
+from qdrant_client import QdrantClient
 # Global initialization - MUST be at the top level
 qdrant_client = QdrantClient(
     url=st.secrets["QDRANT_URL"],
