@@ -5,12 +5,13 @@ from qdrant_client import QdrantClient
 # --- Configuration & Initialization ---
 st.set_page_config(page_title="Enterprise AI Platform", layout="wide")
 
-# Initialize Clients
+# Initialize Qdrant Client
 qdrant_client = QdrantClient(
     url=st.secrets["QDRANT_URL"],
     api_key=st.secrets["QDRANT_API_KEY"]
 )
 
+# --- Unified Helper Function ---
 def get_llm_response(prompt, context=None):
     client = OpenAI(
         api_key=st.secrets["GEMINI_API_KEY"],
@@ -56,13 +57,14 @@ if user_query:
         # MODE 2: RAG Pipeline
         elif app_mode == "Knowledge Base Retrieval (RAG)":
             with st.spinner("🔍 Retrieving from Vector DB..."):
-                # Note: Ensure query_vector matches your embedding model dimensions (e.g., 768 or 1536)
-                search_results = qdrant_client.search(
+                # Updated to use 'query_points' instead of 'search'
+                search_results = qdrant_client.query_points(
                     collection_name="enterprise_knowledge",
-                    query_vector=[0.0] * 1536, 
+                    query=[0.0] * 1536, # Ensure this size matches your embedding dimensions
                     limit=3
-                )
+                ).points
                 
+                # Extract text from payloads
                 retrieved_context = "\n".join([hit.payload.get("text", "") for hit in search_results if hit.payload])
                 
                 if not retrieved_context:
