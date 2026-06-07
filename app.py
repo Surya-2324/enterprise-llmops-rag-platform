@@ -29,7 +29,7 @@ if user_query:
                         {"role": "user", "content": user_query}
                 ]
             )
-                )
+                
                 st.write(response.choices[0].message.content)
                 
             except Exception as e:
