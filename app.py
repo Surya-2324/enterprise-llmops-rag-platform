@@ -39,7 +39,3 @@ if user_query:
             # Put your existing embedding generation, Qdrant payload search, 
             # and context-augmented LLM prompt logic right here.
             pass
-                st.caption(f"Source Match: \n\"{matched_context}\"")
-                
-        except Exception as e:
-            st.error(f"Pipeline Execution Error: {e}")
