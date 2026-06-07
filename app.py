@@ -22,16 +22,17 @@ if user_query:
         # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
        # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
+      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
         if app_mode == "Open-Source (General Knowledge)":
             try:
-                # Self-contained client initialization
+                # Fully self-contained client configuration
                 general_client = OpenAI(
                     api_key=st.secrets["XAI_API_KEY"],
                     base_url="https://api.x.ai/v1"
                 )
                 
                 response = general_client.chat.completions.create(
-                    model="grok-2-1212",  # Standard stable production text model identifier
+                    model="grok-4.3",  # The current standard production flagship text model identifier
                     messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
@@ -39,6 +40,8 @@ if user_query:
                 )
                 st.write(response.choices[0].message.content)
                 
+            except Exception as e:
+                st.error(f"Error calling LLM: {e}")
             except Exception as e:
                 st.error(f"Error calling LLM: {e}")
         # 🔒 MODE 2: Enterprise RAG Mode (Your Original Logic)
