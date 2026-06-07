@@ -28,7 +28,7 @@ if user_query:
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
                 ]
-          )
+            )
                 )
                 st.write(response.choices[0].message.content)
                 
