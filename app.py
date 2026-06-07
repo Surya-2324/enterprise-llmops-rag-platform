@@ -20,16 +20,22 @@ if user_query:
     with st.spinner("Processing request..."):
         
         # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
+       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
         if app_mode == "Open-Source (General Knowledge)":
             try:
-                response = client.chat.completions.create(  # <-- Change openai_client to client
-                 model="grok-beta",
-                 messages=[
+                # Self-contained client initialization using your saved secrets
+                general_client = OpenAI(
+                    api_key=st.secrets["XAI_API_KEY"],
+                    base_url="https://api.x.ai/v1"
+                )
+                
+                response = general_client.chat.completions.create(
+                    model="grok-beta",
+                    messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
-                ]
-            )
-                
+                    ]
+                )
                 st.write(response.choices[0].message.content)
                 
             except Exception as e:
