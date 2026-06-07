@@ -1,13 +1,13 @@
 import streamlit as st
-from openai import OpenAI
 from qdrant_client import QdrantClient
 
-# --- INITIALIZATION ---
-# This must be at the top level so it is defined for the entire script
+# Global initialization - MUST be at the top level
 qdrant_client = QdrantClient(
     url=st.secrets["QDRANT_URL"],
     api_key=st.secrets["QDRANT_API_KEY"]
 )
+
+# ... rest of your code ...
 # Updated to use the correct collection name and vector size found in your dashboard
 search_results = qdrant_client.query_points(
     collection_name="system_architecture",  # Correct name
