@@ -29,24 +29,22 @@ if user_query:
       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
       # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
     # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
+      # 🚀 MODE 1: General Knowledge Mode (Bypass RAG)
         if app_mode == "Open-Source (General Knowledge)":
             try:
-                # 1. Initialize client with a clean variable name matching your secrets panel mapping name
+                # Initialize client using the secret variable name
                 general_client = OpenAI(
-                    api_key=st.secrets["AQ.Ab8RN6LuUu-q6fSClnfAuSzpk-CoV8dhIc-LK-WSy4S_65Jgdg"],
+                    api_key=st.secrets["GEMINI_API_KEY"],
                     base_url="https://generativelanguage.googleapis.com/v1beta/openai"
                 )
                 
-                # 2. Call completions using the exact variable name defined above
                 response = general_client.chat.completions.create(
-                    model="gemini-2.5-flash",  # Zero-cost high-speed production model string
+                    model="gemini-2.5-flash",  # Zero-cost, high-speed model
                     messages=[
                         {"role": "system", "content": "You are a helpful, brilliant open-source AI assistant."},
                         {"role": "user", "content": user_query}
                     ]
                 )
-                
-                # 3. Output payload cleanly onto the UI dashboard container
                 st.write(response.choices[0].message.content)
                 
             except Exception as e:
