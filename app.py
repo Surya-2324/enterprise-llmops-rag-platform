@@ -1,76 +1,59 @@
 import streamlit as st
-from openai import OpenAI
+import fitz  # PyMuPDF
+from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
+from openai import OpenAI
+import uuid
 
-# --- INITIALIZATION ---
-# Initialize at the top level so it's available everywhere
-try:
-    qdrant_client = QdrantClient(
-        url=st.secrets["QDRANT_URL"],
-        api_key=st.secrets["QDRANT_API_KEY"]
-    )
-except Exception as e:
-    st.error(f"Failed to initialize Qdrant: {e}")
-    st.stop()
+# --- 1. CONFIG & INITIALIZATION ---
+st.set_page_config(page_title="PDF Q&A RAG Platform", layout="wide")
+model = SentenceTransformer('all-MiniLM-L6-v2') # 384-dim model
+qdrant_client = QdrantClient(url=st.secrets["QDRANT_URL"], api_key=st.secrets["QDRANT_API_KEY"])
 
-# --- Helper Functions ---
-def get_llm_response(prompt, context=None):
-    client = OpenAI(
-        api_key=st.secrets["GEMINI_API_KEY"],
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai"
-    )
-    system_instruction = "You are a helpful, brilliant Enterprise AI assistant."
-    if context:
-        system_instruction = f"Use this retrieved enterprise context to answer: {context}"
+# --- 2. CORE FUNCTIONS ---
+def get_llm_response(prompt, context):
+    client = OpenAI(api_key=st.secrets["GEMINI_API_KEY"], base_url="https://generativelanguage.googleapis.com/v1beta/openai")
+    messages = [
+        {"role": "system", "content": f"Answer based on this context: {context}"},
+        {"role": "user", "content": prompt}
+    ]
+    return client.chat.completions.create(model="gemini-2.5-flash", messages=messages).choices[0].message.content
+
+# --- 3. UI & LOGIC ---
+st.title("📄 PDF Intelligent Q&A")
+
+# Mode Selection
+mode = st.sidebar.radio("Mode", ["Upload PDF", "Ask Questions"])
+
+if mode == "Upload PDF":
+    uploaded_file = st.file_uploader("Choose a PDF", type="pdf")
+    if uploaded_file and st.button("Process Document"):
+        with st.spinner("Processing..."):
+            doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
+            text = "".join([page.get_text() for page in doc])
+            chunks = [text[i:i+800] for i in range(0, len(text), 800)] # 800 char chunks
+            
+            points = []
+            for chunk in chunks:
+                points.append({
+                    "id": str(uuid.uuid4()),
+                    "vector": model.encode(chunk).tolist(),
+                    "payload": {"text": chunk}
+                })
+            qdrant_client.upsert(collection_name="system_architecture", points=points)
+            st.success("PDF knowledge added to Qdrant!")
+
+elif mode == "Ask Questions":
+    query = st.text_input("Ask a question about your PDF:")
+    if query:
+        # Search Qdrant
+        search_results = qdrant_client.query_points(
+            collection_name="system_architecture",
+            query=model.encode(query).tolist(),
+            limit=3
+        ).points
         
-    response = client.chat.completions.create(
-        model="gemini-2.5-flash",
-        messages=[
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    return response.choices[0].message.content
-
-# --- UI Layout ---
-st.set_page_config(page_title="Enterprise AI Platform", layout="wide")
-st.title("🏢 Enterprise LLMOps Platform")
-app_mode = st.sidebar.radio("Choose Mode:", ["Open-Source (General Knowledge)", "Knowledge Base Retrieval (RAG)"])
-
-user_query = st.text_input("Submit your question:")
-
-# --- Core Logic ---
-if user_query:
-    with st.chat_message("user"):
-        st.write(user_query)
-
-    try:
-        if app_mode == "Open-Source (General Knowledge)":
-            with st.spinner("🧠 Generating response..."):
-                answer = get_llm_response(user_query)
-                with st.chat_message("assistant"):
-                    st.write(answer)
-
-        elif app_mode == "Knowledge Base Retrieval (RAG)":
-            with st.spinner("🔍 Retrieving from Vector DB..."):
-                # Fixed: Correct collection name and dimension (384)
-                results = qdrant_client.query_points(
-                    collection_name="system_architecture", 
-                    query=[0.0] * 384, 
-                    limit=3
-                ).points
-                
-                context = "\n".join([hit.payload.get("text", "") for hit in results if hit.payload])
-                
-                if not context:
-                    context = "No specific enterprise documentation found."
-                
-                answer = get_llm_response(user_query, context=context)
-                
-                with st.chat_message("assistant"):
-                    st.write(answer)
-                    with st.expander("🛠️ View Context"):
-                        st.json([hit.payload for hit in results])
-
-    except Exception as e:
-        st.error(f"Pipeline Error: {e}")
+        context = "\n".join([hit.payload.get("text", "") for hit in search_results])
+        answer = get_llm_response(query, context)
+        st.write("### Answer:")
+        st.write(answer)
