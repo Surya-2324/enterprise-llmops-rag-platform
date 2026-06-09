@@ -53,7 +53,16 @@ elif mode == "Ask Questions":
             limit=3
         ).points
         
-        context = "\n".join([hit.payload.get("text", "") for hit in search_results])
-        answer = get_llm_response(query, context)
-        st.write("### Answer:")
-        st.write(answer)
+        # --- Confidence Score Logic ---
+        st.write("### Retrieved Context & Confidence:")
+        context = ""
+        for hit in search_results:
+            confidence = round(hit.score * 100, 2)
+            context += hit.payload.get("text", "") + "\n"
+            st.write(f"- **Confidence: {confidence}%** | Snippet: {hit.payload.get('text', '')[:100]}...")
+        
+        # Generate Answer
+        with st.spinner("Generating AI response..."):
+            answer = get_llm_response(query, context)
+            st.write("### AI Answer:")
+            st.write(answer)
